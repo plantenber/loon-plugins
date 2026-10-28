@@ -1,9 +1,14 @@
-#!name=拼多多去广告（仅Rewrite无Rule）
-#!desc=不使用Rule域名拦截；Rewrite处理聊天/个人中心/首页广告，并尽量固定底栏为首页/聊天/个人中心。
+#!name=拼多多去广告
+#!desc=仅处理首页、聊天页、个人中心广告，完全不触碰商品详情页相关接口，避免卡顿和商品售罄提示。
 #App链接=https://apps.apple.com/app/id1044283059
-#!author=本地修改
+#!author=ZenmoFeiShi, 可莉, 本地修改
 #!tag=去广告
+#!loon_version=3.5.1(998)
+#!homepage=https://github.com/plantenber/loon-plugins
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/PinDuoDuo.png
 #!date=2026-10-28
+
+[Rule]
 
 [Rewrite]
 # 聊天推广
@@ -22,8 +27,8 @@ request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/growth\/nagato\/app\/
 # 首页部分内容精简
 response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.delete(["result.dy_module.irregular_banner_dy", "result.icon_set", "result.search_bar_hot_query"])
 
-# 底栏：按链接关键字只保留首页/聊天/个人中心
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.jq(".result.bottom_tabs? |= map(select((.link // \"\") | tostring | test(\"index\\.html|chat_list|personal\"; \"i\"))) | .result.buffer_bottom_tabs? |= map(select((.link // \"\") | tostring | test(\"index\\.html|chat_list|personal\"; \"i\")))")
+# 底栏：只留首页 / 聊天 / 个人中心（去掉多多视频、点我领券）
+response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.jq(".result.bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\")))")
 
 response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/search\?/i then response.json.delete("expansion")
 
