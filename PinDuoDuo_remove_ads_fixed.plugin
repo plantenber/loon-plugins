@@ -1,5 +1,5 @@
-#!name=拼多多去广告（仅首页精简）
-#!desc=只处理首页、聊天、个人中心广告，完全不拦截商品详情相关接口和图片域名，避免卡顿和闪屏。
+#!name=拼多多去广告（去视频领券）
+#!desc=保留聊天、订单去广告；去除底部多多视频与点我领券；不做首页净化，避免商品详情卡顿。
 #App链接=https://apps.apple.com/app/id1044283059
 #!author=本地修改
 #!tag=去广告
@@ -9,7 +9,7 @@
 #!date=2026-10-28
 
 [Rule]
-# 仅拦截开屏/追踪类非必要域名，不拦截任何图片CDN
+# 仅拦截非必要追踪/开屏相关域名，不拦截图片CDN
 AND, ((DOMAIN, api.pinduoduo.com), (PROTOCOL, QUIC)), REJECT
 DOMAIN, titan.pinduoduo.com, REJECT
 DOMAIN, apm.pinduoduo.com, REJECT
@@ -17,30 +17,22 @@ DOMAIN, apm-a.pinduoduo.com, REJECT
 DOMAIN, meta.pinduoduo.com, REJECT
 
 [Rewrite]
-# 仅处理首页
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aquarius\/hungary\/global\/homepage\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/search_hotquery\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/growth\/nagato\/app\/index\/gather\?/i then reject_dict(200)
-
-# 仅处理聊天页推广
+# 聊天页推广
 request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/zaire_biz\/chat\/resource\/get_list_data\?/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/new_chat_group\?/i then reject_dict(200)
 
-# 仅处理个人中心推荐
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/personal\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/likes\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/goods\/back_up\?/i then reject_dict(200)
+# 订单相关推广
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/unrated_order_for_unreceived_tab\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/query_order_list_tabs_element\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/my_order_group\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/order_express_group\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/engels\/wait\/receive\/review\?/i then reject_dict(200)
 
-# 首页精简
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.delete(["result.dy_module.irregular_banner_dy", "result.icon_set", "result.search_bar_hot_query"])
+# 仅去掉底部「多多视频」和「点我领券」入口，不做其他首页净化
+response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.jq(".result.bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\")))")
 
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.jq(".result.bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\"))) | .result.all_top_opts |= map(del(.selected_image, .image, .height, .width))")
-
-# 搜索页精简
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/search\?/i then response.json.delete("expansion")
-
-# 个人中心精简
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/philo\/personal\/hub\?/i then response.json.delete(["monthly_card_entrance", "personal_center_style_v2_vo", "icon_set.icons", "icon_set.top_personal_icons", "personal_banner"])
+# 订单列表去掉部分营销提示
+response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/order_list_v4\?/i then response.json.jq(".orders |= map(.order_buttons |= map(del(.order_growth_tip)))")
 
 [MitM]
 hostname=api.pinduoduo.com
