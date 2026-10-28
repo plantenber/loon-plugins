@@ -1,12 +1,24 @@
-#!name=拼多多轻量去追踪
-#!desc=仅拦截部分追踪域名，不做任何接口改写与MITM，尽量不影响商品详情页。
-#!author=本地修改
+#!name=拼多多去广告（仅规则拦截）
+#!desc=仅使用原版 [Rule] 域名/协议拦截，不启用 MitM 与 Rewrite，测试是否减少详情页卡顿。
+#App链接=https://apps.apple.com/app/id1044283059
+#!author=ZenmoFeiShi, 可莉, 本地修改
 #!tag=去广告
+#!loon_version=3.5.1(998)
+#!homepage=https://github.com/plantenber/loon-plugins
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/PinDuoDuo.png
 #!date=2026-10-28
 
 [Rule]
+AND, ((URL-REGEX, "^http:\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/d(\d)?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT
+AND, ((URL-REGEX, "^http:\/\/\[[0-9a-fA-F:]+\]\/d(\d)?\?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT
+AND, ((DOMAIN, api.pinduoduo.com), (PROTOCOL, QUIC)), REJECT
 DOMAIN, titan.pinduoduo.com, REJECT
-DOMAIN, apm.pinduoduo.com, REJECT
-DOMAIN, apm-a.pinduoduo.com, REJECT
-DOMAIN, meta.pinduoduo.com, REJECT
 DOMAIN, xg.pinduoduo.com, REJECT
+DOMAIN, apm.pinduoduo.com, REJECT
+DOMAIN, th-b.pinduoduo.com, REJECT
+DOMAIN, ta.pinduoduo.com, REJECT
+DOMAIN, th.pinduoduo.com, REJECT
+DOMAIN, th-a.pinduoduo.com, REJECT
+DOMAIN, ta-a.pinduoduo.com, REJECT
+DOMAIN, meta.pinduoduo.com, REJECT
+DOMAIN, apm-a.pinduoduo.com, REJECT
