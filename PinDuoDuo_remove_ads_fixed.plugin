@@ -1,24 +1,30 @@
-#!name=拼多多去广告（仅规则拦截）
-#!desc=仅使用原版 [Rule] 域名/协议拦截，不启用 MitM 与 Rewrite，测试是否减少详情页卡顿。
+#!name=拼多多去广告（仅Rewrite无Rule）
+#!desc=不使用Rule域名拦截，仅用MitM+Rewrite处理首页/聊天/个人中心部分广告。可能仍有轻微延迟，详情页若异常请关闭。
 #App链接=https://apps.apple.com/app/id1044283059
-#!author=ZenmoFeiShi, 可莉, 本地修改
+#!author=本地修改
 #!tag=去广告
-#!loon_version=3.5.1(998)
-#!homepage=https://github.com/plantenber/loon-plugins
-#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/PinDuoDuo.png
 #!date=2026-10-28
 
-[Rule]
-AND, ((URL-REGEX, "^http:\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/d(\d)?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT
-AND, ((URL-REGEX, "^http:\/\/\[[0-9a-fA-F:]+\]\/d(\d)?\?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT
-AND, ((DOMAIN, api.pinduoduo.com), (PROTOCOL, QUIC)), REJECT
-DOMAIN, titan.pinduoduo.com, REJECT
-DOMAIN, xg.pinduoduo.com, REJECT
-DOMAIN, apm.pinduoduo.com, REJECT
-DOMAIN, th-b.pinduoduo.com, REJECT
-DOMAIN, ta.pinduoduo.com, REJECT
-DOMAIN, th.pinduoduo.com, REJECT
-DOMAIN, th-a.pinduoduo.com, REJECT
-DOMAIN, ta-a.pinduoduo.com, REJECT
-DOMAIN, meta.pinduoduo.com, REJECT
-DOMAIN, apm-a.pinduoduo.com, REJECT
+[Rewrite]
+# 聊天推广
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/zaire_biz\/chat\/resource\/get_list_data\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/new_chat_group\?/i then reject_dict(200)
+
+# 个人中心推荐
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/personal\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/likes\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/goods\/back_up\?/i then reject_dict(200)
+
+# 搜索热词等
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/search_hotquery\?/i then reject_dict(200)
+request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/growth\/nagato\/app\/index\/gather\?/i then reject_dict(200)
+
+# 首页部分内容精简（不含底栏）
+response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.delete(["result.dy_module.irregular_banner_dy", "result.icon_set", "result.search_bar_hot_query"])
+
+response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/search\?/i then response.json.delete("expansion")
+
+response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/philo\/personal\/hub\?/i then response.json.delete(["monthly_card_entrance", "personal_center_style_v2_vo", "icon_set.icons", "icon_set.top_personal_icons", "personal_banner"])
+
+[MitM]
+hostname=api.pinduoduo.com
