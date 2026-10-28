@@ -1,66 +1,12 @@
-#!name=拼多多去广告（保留原规则去底栏）
-#!desc=基于原版去广告，仅去掉底栏「多多视频/点我领券」相关修改，保留其余规则。
-#App链接=https://apps.apple.com/app/id1044283059
-#!author=ZenmoFeiShi, 可莉, 本地修改
+#!name=拼多多轻量去追踪
+#!desc=仅拦截部分追踪域名，不做任何接口改写与MITM，尽量不影响商品详情页。
+#!author=本地修改
 #!tag=去广告
-#!loon_version=3.5.1(998)
-#!homepage=https://github.com/plantenber/loon-plugins
-#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/PinDuoDuo.png
 #!date=2026-10-28
 
 [Rule]
-AND, ((URL-REGEX, "^http:\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/d(\d)?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT
-AND, ((URL-REGEX, "^http:\/\/\[[0-9a-fA-F:]+\]\/d(\d)?\?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT
-AND, ((DOMAIN, api.pinduoduo.com), (PROTOCOL, QUIC)), REJECT
 DOMAIN, titan.pinduoduo.com, REJECT
-DOMAIN, xg.pinduoduo.com, REJECT
 DOMAIN, apm.pinduoduo.com, REJECT
-DOMAIN, th-b.pinduoduo.com, REJECT
-DOMAIN, ta.pinduoduo.com, REJECT
-DOMAIN, th.pinduoduo.com, REJECT
-DOMAIN, th-a.pinduoduo.com, REJECT
-DOMAIN, ta-a.pinduoduo.com, REJECT
-DOMAIN, meta.pinduoduo.com, REJECT
 DOMAIN, apm-a.pinduoduo.com, REJECT
-
-[Rewrite]
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/unrated_order_for_unreceived_tab\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/query_order_list_tabs_element\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aquarius\/hungary\/global\/homepage\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/order_express_group\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/search_hotquery\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/zaire_biz\/chat\/resource\/get_list_data\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/new_chat_group\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/goods\/back_up\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/personal\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/brand-olay\/goods_detail\/bybt_guide\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/engels\/reviews\/require\/append\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/my_order_group\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/likes\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/phantom\/gbdbpdv\/extra\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/manufacturer\/cross\/shortcut\/list\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/dunkirk\/liveactivity\/push\/create\/url\/report\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/growth\/nagato\/app\/index\/gather\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/engels\/wait\/receive\/review\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/buffon\/nasus\/recommend\?/i then reject_dict(200)
-
-# 首页去广告（已去掉底栏 bottom_tabs 相关修改）
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.delete(["result.dy_module.irregular_banner_dy", "result.icon_set", "result.search_bar_hot_query"])
-
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/search\?/i then response.json.delete("expansion")
-
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/philo\/personal\/hub\?/i then response.json.delete(["monthly_card_entrance", "personal_center_style_v2_vo", "icon_set.icons", "icon_set.top_personal_icons", "personal_banner"])
-
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/oak\/integration\/render\?/i then response.json.delete(["bottom_section_list", "ui.bottom_section", "ui.live_section.float_info"])
-
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/order_detail_group\?/i then response.json.delete("data.goods_list")
-
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/order\//i then response.json.delete(["marketing_banner_vo", "shipping.banner_above_recommend"])
-
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/order_list_v4\?/i then response.json.jq(".orders |= map(.order_buttons |= map(del(.order_growth_tip)))")
-
-[Script]
-response if ${url} ~= /^https:\/\/m\.pinduoduo\.net\/mdkd\/package\?from_app_scan/i then script("https://github.com/Moli-X/Tool/raw/X/Loon/Plugin/Kelee/Script/PinDuoDuo_remove_ads.js") with tag="移除扫码取件页面商品推荐及弹窗", requires_body=true
-
-[MitM]
-hostname=api.pinduoduo.com, m.pinduoduo.net
+DOMAIN, meta.pinduoduo.com, REJECT
+DOMAIN, xg.pinduoduo.com, REJECT
