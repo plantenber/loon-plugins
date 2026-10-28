@@ -1,5 +1,5 @@
-#!name=拼多多去广告（最干净版）
-#!desc=仅处理首页、聊天页、个人中心广告，完全不触碰商品详情页相关接口，避免卡顿和商品售罄提示。
+#!name=拼多多去广告（仅首页精简）
+#!desc=只处理首页、聊天、个人中心广告，完全不拦截商品详情相关接口和图片域名，避免卡顿和闪屏。
 #App链接=https://apps.apple.com/app/id1044283059
 #!author=本地修改
 #!tag=去广告
@@ -9,19 +9,12 @@
 #!date=2026-10-28
 
 [Rule]
-AND, ((URL-REGEX, "^http:\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/d(\d)?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT
-AND, ((URL-REGEX, "^http:\/\/\[[0-9a-fA-F:]+\]\/d(\d)?\?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT
+# 仅拦截开屏/追踪类非必要域名，不拦截任何图片CDN
 AND, ((DOMAIN, api.pinduoduo.com), (PROTOCOL, QUIC)), REJECT
 DOMAIN, titan.pinduoduo.com, REJECT
-DOMAIN, xg.pinduoduo.com, REJECT
 DOMAIN, apm.pinduoduo.com, REJECT
-DOMAIN, th-b.pinduoduo.com, REJECT
-DOMAIN, ta.pinduoduo.com, REJECT
-DOMAIN, th.pinduoduo.com, REJECT
-DOMAIN, th-a.pinduoduo.com, REJECT
-DOMAIN, ta-a.pinduoduo.com, REJECT
-DOMAIN, meta.pinduoduo.com, REJECT
 DOMAIN, apm-a.pinduoduo.com, REJECT
+DOMAIN, meta.pinduoduo.com, REJECT
 
 [Rewrite]
 # 仅处理首页
@@ -33,17 +26,17 @@ request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/growth\/nagato\/app\/
 request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/zaire_biz\/chat\/resource\/get_list_data\?/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/new_chat_group\?/i then reject_dict(200)
 
-# 仅处理个人中心
+# 仅处理个人中心推荐
 request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/personal\?/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/likes\?/i then reject_dict(200)
 request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/goods\/back_up\?/i then reject_dict(200)
 
-# 首页内容精简
+# 首页精简
 response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.delete(["result.dy_module.irregular_banner_dy", "result.icon_set", "result.search_bar_hot_query"])
 
 response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.jq(".result.bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\"))) | .result.all_top_opts |= map(del(.selected_image, .image, .height, .width))")
 
-# 搜索页
+# 搜索页精简
 response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/search\?/i then response.json.delete("expansion")
 
 # 个人中心精简
