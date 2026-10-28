@@ -1,5 +1,5 @@
 #!name=拼多多去广告（仅Rewrite无Rule）
-#!desc=不使用Rule域名拦截，仅用MitM+Rewrite处理首页/聊天/个人中心部分广告，并去掉底栏多多视频与点我领券。
+#!desc=不使用Rule域名拦截；Rewrite处理聊天/个人中心/首页广告，并尽量固定底栏为首页/聊天/个人中心。
 #App链接=https://apps.apple.com/app/id1044283059
 #!author=本地修改
 #!tag=去广告
@@ -22,8 +22,8 @@ request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/growth\/nagato\/app\/
 # 首页部分内容精简
 response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.delete(["result.dy_module.irregular_banner_dy", "result.icon_set", "result.search_bar_hot_query"])
 
-# 底栏：只留首页 / 聊天 / 个人中心（去掉多多视频、点我领券）
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.jq(".result.bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\")))")
+# 底栏：按链接关键字只保留首页/聊天/个人中心
+response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.jq(".result.bottom_tabs? |= map(select((.link // \"\") | tostring | test(\"index\\.html|chat_list|personal\"; \"i\"))) | .result.buffer_bottom_tabs? |= map(select((.link // \"\") | tostring | test(\"index\\.html|chat_list|personal\"; \"i\")))")
 
 response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/search\?/i then response.json.delete("expansion")
 
