@@ -1,5 +1,5 @@
-#!name=拼多多去广告（去视频领券）
-#!desc=保留聊天、订单去广告；去除底部多多视频与点我领券；不做首页净化，避免商品详情卡顿。
+#!name=拼多多去广告（仅去底部视频领券）
+#!desc=仅保留底部导航：首页 / 聊天 / 个人中心，去掉多多视频和点我领券。其余规则全部关闭。
 #App链接=https://apps.apple.com/app/id1044283059
 #!author=本地修改
 #!tag=去广告
@@ -8,31 +8,8 @@
 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/PinDuoDuo.png
 #!date=2026-10-28
 
-[Rule]
-# 仅拦截非必要追踪/开屏相关域名，不拦截图片CDN
-AND, ((DOMAIN, api.pinduoduo.com), (PROTOCOL, QUIC)), REJECT
-DOMAIN, titan.pinduoduo.com, REJECT
-DOMAIN, apm.pinduoduo.com, REJECT
-DOMAIN, apm-a.pinduoduo.com, REJECT
-DOMAIN, meta.pinduoduo.com, REJECT
-
 [Rewrite]
-# 聊天页推广
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/zaire_biz\/chat\/resource\/get_list_data\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/new_chat_group\?/i then reject_dict(200)
-
-# 订单相关推广
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/unrated_order_for_unreceived_tab\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/query_order_list_tabs_element\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/my_order_group\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/order_express_group\?/i then reject_dict(200)
-request if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/engels\/wait\/receive\/review\?/i then reject_dict(200)
-
-# 仅去掉底部「多多视频」和「点我领券」入口，不做其他首页净化
 response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?/i then response.json.jq(".result.bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN(\"index.html\", \"chat_list.html\", \"personal.html\")))")
-
-# 订单列表去掉部分营销提示
-response if ${url} ~= /^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/order_list_v4\?/i then response.json.jq(".orders |= map(.order_buttons |= map(del(.order_growth_tip)))")
 
 [MitM]
 hostname=api.pinduoduo.com
